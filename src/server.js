@@ -191,6 +191,19 @@ async function startGateway() {
     OPENCLAW_GATEWAY_TOKEN,
   ];
 
+  // Auto-configure Google realtime voice provider if GOOGLE_API_KEY is set
+  const googleKey = process.env.GOOGLE_API_KEY?.trim();
+  if (googleKey) {
+    const cfgCmds = [
+      ["config", "set", "talk.realtime.provider", "google"],
+      ["config", "set", "--json", "talk.realtime.providers.google", JSON.stringify({ apiKey: googleKey })],
+    ];
+    for (const ca of cfgCmds) {
+      const r = await runCmd(OPENCLAW_NODE, clawArgs(ca));
+      if (r.code !== 0) console.error(`[config] ${ca.join(" ")} failed: ${r.output}`);
+    }
+  }
+
   gatewayProc = childProcess.spawn(OPENCLAW_NODE, clawArgs(args), {
     stdio: "inherit",
     env: {
