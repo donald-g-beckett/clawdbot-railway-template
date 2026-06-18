@@ -51,6 +51,16 @@ RUN apt-get update \
     python3-venv \
   && rm -rf /var/lib/apt/lists/*
 
+# Install whisper-cpp for free local voice transcription (auto-detected by OpenClaw)
+ARG WHISPER_CPP_VERSION=v1.9.0
+ARG WHISPER_MODEL=ggml-tiny.en.bin
+RUN curl -fsSL "https://github.com/ggerganov/whisper.cpp/releases/download/${WHISPER_CPP_VERSION}/whisper-bin-ubuntu-x64.tar.gz" \
+  | tar xz -C /usr/local/bin/ --strip-components=1 --wildcards '*/whisper-cli' \
+  && chmod +x /usr/local/bin/whisper-cli
+RUN mkdir -p /app/models \
+  && curl -fsSL "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin" -o /app/models/ggml-tiny.en.bin
+ENV WHISPER_CPP_MODEL=/app/models/ggml-tiny.en.bin
+
 # `openclaw update` expects pnpm. Provide it in the runtime image.
 RUN corepack enable && corepack prepare pnpm@10.23.0 --activate
 
