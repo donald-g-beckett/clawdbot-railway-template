@@ -23,7 +23,10 @@ WORKDIR /openclaw
 # Pin to a known-good ref (tag/branch). Override in Railway template settings if needed.
 # Using a released tag avoids build breakage when `main` temporarily references unpublished packages.
 ARG OPENCLAW_GIT_REF=v2026.6.8
-RUN git clone --depth 1 --branch "${OPENCLAW_GIT_REF}" https://github.com/openclaw/openclaw.git .
+RUN git init . \\
+  && git remote add origin https://github.com/openclaw/openclaw.git \\
+  && git fetch --depth 1 origin "${OPENCLAW_GIT_REF}" \\
+  && git checkout --detach FETCH_HEAD
 
 # Patch: relax version requirements for packages that may reference unpublished versions.
 # Apply to all extension package.json files to handle workspace protocol (workspace:*).
